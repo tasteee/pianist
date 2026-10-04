@@ -29,3 +29,8 @@ npm run dev
 | `src/components/*` | Controls, keyboard, piano strip |
 
 Built with SolidJS + Vite + TypeScript.
+
+## Deploy
+
+Every push to `main` builds and deploys to GitHub Pages via `.github/workflows/deploy.yml`.
+Live at https://tasteee.github.io/pianist/
