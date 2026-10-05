@@ -203,8 +203,7 @@ button {
 }
 
 .segmented {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  display: inline-flex;
   gap: 2px;
   padding: 3px;
   background: var(--fill);
@@ -212,7 +211,7 @@ button {
 }
 
 @media (min-width: 560px) {
-  .segmented {
+  .segmented.segmented--keys {
     grid-template-columns: repeat(12, 1fr);
   }
 }
@@ -360,6 +359,206 @@ button {
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.15);
 }
 
+.segmented--keys {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.segmented--compact .segment {
+  min-width: 44px;
+  padding: 0 10px;
+}
+
+.stepper--s {
+  height: 32px;
+  padding: 2px;
+}
+
+.stepper--s .stepper-btn {
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+}
+
+.stepper--s .stepper-value {
+  min-width: 22px;
+  font-size: 13px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    background 0.15s var(--ease),
+    border-color 0.15s var(--ease);
+}
+
+.button:hover {
+  border-color: var(--ink-4);
+  background: var(--bg);
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.chip {
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+  transition:
+    background 0.15s var(--ease),
+    color 0.15s var(--ease),
+    border-color 0.15s var(--ease);
+}
+
+.chip:hover {
+  border-color: var(--ink-4);
+  color: var(--ink);
+}
+
+.chip.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+/* ---- Layout ------------------------------------------------------------ */
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.layout-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 20px;
+}
+
+.layout-select {
+  width: 220px;
+  max-width: 100%;
+}
+
+@media (max-width: 559px) {
+  .layout-select {
+    width: 100%;
+  }
+  .layout-head .layout-about {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+}
+
+.layout-about {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+}
+
+.layout-category {
+  flex: none;
+  height: 22px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  background: var(--fill);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  cursor: help;
+}
+
+.layout-desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.custom {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border-radius: var(--radius-m);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  animation: reveal 0.25s var(--ease);
+}
+
+.custom-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+
+.custom-grid--rows {
+  align-items: center;
+  gap: 10px 20px;
+}
+
+.custom-rows-label {
+  width: 100%;
+}
+
+.custom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-row-name {
+  min-width: 34px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.custom-examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-examples .field-label {
+  margin-right: 4px;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
 /* ---- Stage ------------------------------------------------------------- */
 
 .stage {
@@ -449,7 +648,7 @@ button {
 
 .keyboard {
   --gap: max(3px, calc(var(--u) * 0.08));
-  --u: min(68px, calc(100cqw / var(--units)));
+  --u: min(76px, calc(100cqw / var(--units)));
   display: flex;
   flex-direction: column;
   gap: var(--gap);
@@ -493,6 +692,18 @@ button {
 
 .keycap.is-root {
   background: var(--key-root);
+}
+
+.keycap.is-silent {
+  background: transparent;
+  border-style: dashed;
+  border-bottom-width: 1px;
+  box-shadow: none;
+  cursor: default;
+}
+
+.keycap.is-silent .keycap-legend {
+  color: var(--ink-4);
 }
 
 .keycap.is-down {
@@ -560,7 +771,7 @@ button {
 }
 
 .keyboard-row--space {
-  padding-left: calc(var(--u) * 4);
+  padding-left: calc(var(--u) * 2.75);
   margin-top: calc(var(--gap) * 0.5);
 }
 

@@ -11,18 +11,22 @@ npm run dev
 
 ## How it plays
 
-- **Rows = octaves.** `Z` row is the base octave, `A` row +1, `Q` row +2, number row +3.
-- **First letter of each row is the root.** Keys to the right walk up the scale.
-- **Backtick** is one step below the number row's root, so all rows line up.
+- **36 keys:** `1`–`0`, `Q`–`P`, `A`–`L`, `Z`–`M` (10 / 10 / 9 / 7).
+- **Layouts** decide which scale degree each key plays. Pick one from the Layout menu:
+  - **Melodic:** Standard, Isometric, Right Up, Down Right, Linear, Staircase
+  - **Harmonic:** Thirds, Fifths, Arpeggio, Pentatonic
+  - **Experimental:** Zig-Zag, Mirror, Random Walk, Custom
+- **Custom** sets horizontal and vertical intervals, direction, scale wrapping and row lengths.
 - **Space** = sustain pedal. **↑ ↓** = octave. **← →** = change key.
-- Keys match by physical position (`KeyboardEvent.code`), so any layout works.
+- Keys match by physical position (`KeyboardEvent.code`), so any language layout works.
 
 ## Code map
 
 | File | Job |
 | --- | --- |
 | `src/music/theory.ts` | Roots, scales, correct note spelling (E♭ not D♯) |
-| `src/music/keymap.ts` | Physical key rows and their scale steps |
+| `src/music/keymap.ts` | Physical key grid |
+| `src/music/layouts.ts` | Layouts: key position → scale step |
 | `src/audio/piano.ts` | AudioContext + SoundFont piano (`smplr`, MusyngKite) |
 | `src/state.ts` | Settings (saved to localStorage), held/sustained notes |
 | `src/input.ts` | Keyboard events → notes |

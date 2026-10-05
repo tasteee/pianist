@@ -1,6 +1,6 @@
 import { For, Show, createSignal, onMount } from 'solid-js'
 import { KEYBOARD_UNITS, ROWS, type KeyDef } from '../music/keymap'
-import { accidentalSymbol } from '../music/theory'
+import { accidentalSymbol, noteLabel } from '../music/theory'
 import { isPressed, noteForCode, press, release, setSustain, sustain } from '../state'
 
 // Use the user's real key legends when the browser can tell us (Chromium).
@@ -48,7 +48,7 @@ export function Keyboard() {
 }
 
 function KeyCap(props: { def: KeyDef }) {
-  const note = () => noteForCode(props.def.code)!
+  const note = () => noteForCode(props.def.code)
   const pointerId = `pointer:${props.def.code}`
   const down = () => isPressed(props.def.code) || isPressed(pointerId)
   const legend = () => legends().get(props.def.code)?.toUpperCase() ?? props.def.label
@@ -57,25 +57,33 @@ function KeyCap(props: { def: KeyDef }) {
     <button
       type="button"
       class="keycap"
-      classList={{ 'is-down': down(), 'is-root': note().degree === 1 }}
+      classList={{ 'is-down': down(), 'is-root': note()?.degree === 1, 'is-silent': !note() }}
       tabIndex={-1}
-      aria-label={`${legend()} plays ${note().letter}${accidentalSymbol(note().accidental)}${note().octave}`}
+      aria-label={note() ? `${legend()} plays ${noteLabel(note()!)}${note()!.octave}` : `${legend()} is silent`}
       onPointerDown={(e) => {
+        const n = note()
+        if (!n) return
         e.currentTarget.setPointerCapture(e.pointerId)
-        press(pointerId, note().midi)
+        press(pointerId, n.midi)
       }}
       onPointerUp={() => release(pointerId)}
       onPointerCancel={() => release(pointerId)}
     >
       <span class="keycap-legend">{legend()}</span>
-      <span class="keycap-note">
-        {note().letter}
-        <Show when={note().accidental}>
-          <span class="keycap-acc">{accidentalSymbol(note().accidental)}</span>
-        </Show>
-        <sub class="keycap-oct">{note().octave}</sub>
-      </span>
-      <span class="keycap-degree">{note().degree}</span>
+      <Show when={note()}>
+        {(n) => (
+          <>
+            <span class="keycap-note">
+              {n().letter}
+              <Show when={n().accidental}>
+                <span class="keycap-acc">{accidentalSymbol(n().accidental)}</span>
+              </Show>
+              <sub class="keycap-oct">{n().octave}</sub>
+            </span>
+            <span class="keycap-degree">{n().degree}</span>
+          </>
+        )}
+      </Show>
     </button>
   )
 }

@@ -1,7 +1,6 @@
 import { For, createMemo } from 'solid-js'
-import { ROWS } from '../music/keymap'
 import { isBlackKey, midiName, mod } from '../music/theory'
-import { noteForCode, press, release, root, scaleNotes, sounding } from '../state'
+import { keyNotes, press, release, root, scaleNotes, sounding } from '../state'
 
 // A piano spanning exactly the range the computer keyboard reaches,
 // padded out to whole octaves. Shows the scale and what's sounding.
@@ -10,7 +9,8 @@ const BLACK_OFFSET: Record<number, number> = { 1: 0.62, 3: 0.78, 6: 0.58, 8: 0.7
 
 export function PianoStrip() {
   const range = createMemo(() => {
-    const midis = ROWS.flatMap((r) => r.keys.map((k) => noteForCode(k.code)!.midi))
+    const midis = [...keyNotes().values()].map((n) => n.midi)
+    if (!midis.length) return []
     const lo = Math.min(...midis)
     const hi = Math.max(...midis)
     const start = lo - mod(lo, 12)

@@ -2,6 +2,7 @@ import { For, Match, Switch } from 'solid-js'
 import { audioUnlocked, loadState } from './audio/piano'
 import { Controls } from './components/Controls'
 import { Keyboard } from './components/Keyboard'
+import { LayoutPanel } from './components/LayoutPanel'
 import { PianoStrip } from './components/PianoStrip'
 import { useKeyboardInput } from './input'
 import { mod, noteLabel } from './music/theory'
@@ -41,6 +42,7 @@ export default function App() {
           </ol>
         </section>
 
+        <LayoutPanel />
         <Keyboard />
         <PianoStrip />
       </main>
@@ -49,7 +51,7 @@ export default function App() {
         <span><kbd>↑</kbd><kbd>↓</kbd> Octave</span>
         <span><kbd>←</kbd><kbd>→</kbd> Key</span>
         <span><kbd>Space</kbd> Sustain</span>
-        <span class="hints-note">Each row up is one octave higher. First letter of each row is the root.</span>
+        <span class="hints-note">Numbers on keys are scale degrees.</span>
       </footer>
     </div>
   )
