@@ -1,6 +1,8 @@
 import { For, createMemo } from 'solid-js'
 import { isBlackKey, midiName, mod } from '../music/theory'
-import { keyNotes, press, release, root, scaleNotes, sounding } from '../state'
+import { notes } from '../engine/events'
+import { sounding } from '../engine/player'
+import { keyNotes, root, scaleNotes } from '../state'
 
 // A piano spanning exactly the range the computer keyboard reaches,
 // padded out to whole octaves. Shows the scale and what's sounding.
@@ -42,12 +44,13 @@ export function PianoStrip() {
           'is-on': sounding().has(p.midi),
         }}
         aria-label={midiName(p.midi)}
+        // The strip already knows its note, so it skips the mapper.
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId)
-          press(id, p.midi)
+          notes.emit('note:on', { id, midi: p.midi, velocity: 100 })
         }}
-        onPointerUp={() => release(id)}
-        onPointerCancel={() => release(id)}
+        onPointerUp={() => notes.emit('note:off', { id })}
+        onPointerCancel={() => notes.emit('note:off', { id })}
       >
         {mod(p.midi, 12) === 0 && <span class="piano-c">{midiName(p.midi)}</span>}
       </button>

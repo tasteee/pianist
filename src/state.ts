@@ -1,6 +1,5 @@
 import { createEffect, createMemo, createSignal } from 'solid-js'
-import { createStore } from 'solid-js/store'
-import { noteOff, noteOn, setVolume as setPianoVolume } from './audio/piano'
+import { setVolume as setPianoVolume } from './engine/player'
 import { KEYS } from './music/keymap'
 import { DEFAULT_CUSTOM, LAYOUTS, type CustomParams } from './music/layouts'
 import { ROOTS, SCALES, mod, scaleNote, type Note } from './music/theory'
@@ -94,53 +93,3 @@ export const noteForCode = (code: string) => keyNotes().get(code)
 
 /** The scale's notes in one octave, for the readout. */
 export const scaleNotes = createMemo(() => scale().steps.map((_, i) => scaleNote(root(), scale(), 4, i)))
-
-// ---- Performance ----------------------------------------------------------
-// `pressed`: sources physically held right now (key codes or pointer ids).
-// `sustained`: released while the pedal was down, still ringing.
-
-const [pressed, setPressed] = createStore<Record<string, number | undefined>>({})
-const [sustained, setSustained] = createStore<Record<string, number | undefined>>({})
-const [sustain, setSustainRaw] = createSignal(false)
-
-export { pressed, sustain }
-
-export function press(id: string, midi: number) {
-  setSustained(id, undefined)
-  setPressed(id, midi)
-  noteOn(id, midi)
-}
-
-export function release(id: string) {
-  const midi = pressed[id]
-  if (midi === undefined) return
-  setPressed(id, undefined)
-  if (sustain()) setSustained(id, midi)
-  else noteOff(id)
-}
-
-export function setSustain(on: boolean) {
-  if (on === sustain()) return
-  setSustainRaw(on)
-  if (on) return
-  for (const id of Object.keys(sustained)) {
-    if (sustained[id] === undefined) continue
-    setSustained(id, undefined)
-    noteOff(id)
-  }
-}
-
-export function releaseAll() {
-  setSustain(false)
-  for (const id of Object.keys(pressed)) release(id)
-}
-
-/** Every MIDI note currently sounding, held or sustained. */
-export const sounding = createMemo(() => {
-  const set = new Set<number>()
-  for (const v of Object.values(pressed)) if (v !== undefined) set.add(v)
-  for (const v of Object.values(sustained)) if (v !== undefined) set.add(v)
-  return set
-})
-
-export const isPressed = (id: string) => pressed[id] !== undefined

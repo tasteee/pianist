@@ -1,14 +1,16 @@
 import { For, Match, Switch } from 'solid-js'
-import { audioUnlocked, loadState } from './audio/piano'
 import { Controls } from './components/Controls'
 import { Keyboard } from './components/Keyboard'
 import { LayoutPanel } from './components/LayoutPanel'
 import { PianoStrip } from './components/PianoStrip'
+import { usePlayEngine } from './engine'
+import { audioUnlocked, loadState, sounding } from './engine/player'
 import { useKeyboardInput } from './input'
 import { mod, noteLabel } from './music/theory'
-import { root, scale, scaleNotes, sounding } from './state'
+import { noteForCode, root, scale, scaleNotes } from './state'
 
 export default function App() {
+  usePlayEngine((code) => noteForCode(code)?.midi)
   useKeyboardInput()
 
   const soundingClasses = () => new Set([...sounding()].map((m) => mod(m, 12)))

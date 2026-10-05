@@ -20,6 +20,14 @@ npm run dev
 - **Space** = sustain pedal. **↑ ↓** = octave. **← →** = change key.
 - Keys match by physical position (`KeyboardEvent.code`), so any language layout works.
 
+## Play pipeline
+
+```
+keyboard / tap ──key:down──▶ mapper ──note:on──▶ player ──▶ Splendid Grand Piano
+                (key code)   (looks up   (MIDI)   (sustain,
+                              layout)              voices)
+```
+
 ## Code map
 
 | File | Job |
@@ -27,9 +35,11 @@ npm run dev
 | `src/music/theory.ts` | Roots, scales, correct note spelling (E♭ not D♯) |
 | `src/music/keymap.ts` | Physical key grid |
 | `src/music/layouts.ts` | Layouts: key position → scale step |
-| `src/audio/piano.ts` | AudioContext + SoundFont piano (`smplr`, MusyngKite) |
-| `src/state.ts` | Settings (saved to localStorage), held/sustained notes |
-| `src/input.ts` | Keyboard events → notes |
+| `src/state.ts` | Settings (saved to localStorage), key → note lookup |
+| `src/input.ts` | Layer 1: keyboard / pointer → `key:down` / `key:up` |
+| `src/engine/mapper.ts` | Layer 2: key code → current note → `note:on` / `note:off` |
+| `src/engine/player.ts` | Layer 3: notes → `smplr` Splendid Grand Piano, sustain pedal |
+| `src/engine/bus.ts`, `events.ts` | Typed event buses between the layers |
 | `src/components/*` | Controls, keyboard, piano strip |
 
 Built with SolidJS + Vite + TypeScript.

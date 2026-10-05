@@ -84,6 +84,11 @@ const continuous = (steps: number): Placement => ({ steps, octave: 0 })
 const pickSteps = (k: number, picks: number[], len: number) =>
   Math.floor(k / picks.length) * len + picks[mod(k, picks.length)]
 
+// ---- Right Up -------------------------------------------------------------
+// First step of each row, top to bottom (1-based in the spec: 26, 16, 8, 1).
+
+const RIGHT_UP_STARTS = [25, 15, 7, 0]
+
 // ---- Staircase ------------------------------------------------------------
 // Ten keys climbing up and to the right; everything else is silent.
 
@@ -149,11 +154,8 @@ export const LAYOUTS: Layout[] = [
     id: 'right-up',
     name: 'Right Up',
     category: 'Melodic',
-    description: 'One long run: left to right along the Z row, then continuing up each row.',
-    place: (k) => {
-      const below = ROW_LENGTHS.slice(k.row + 1).reduce((a, b) => a + b, 0)
-      return continuous(below + k.col)
-    },
+    description: 'One long run up the keyboard: Z row starts at 1, A at 8, Q at 16, numbers at 26.',
+    place: (k) => continuous(RIGHT_UP_STARTS[k.row] + k.col),
   },
   {
     id: 'down-right',

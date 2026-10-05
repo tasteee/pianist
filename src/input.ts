@@ -1,74 +1,81 @@
 import { onCleanup } from 'solid-js'
-import { resume } from './audio/piano'
+import { keys } from './engine/events'
+import { resume } from './engine/player'
 import { KEY_INDEX, SUSTAIN_CODE } from './music/keymap'
-import { noteForCode, octave, press, release, releaseAll, setOctave, setSustain, shiftRoot } from './state'
+import { octave, setOctave, shiftRoot } from './state'
 
-/** Wires the computer keyboard to the piano. Call once from the root component. */
+// Layer 1: physical input → key events.
+// Only says *which key* moved. What it plays is the mapper's job.
+
+const isPlayKey = (code: string) => KEY_INDEX.has(code) || code === SUSTAIN_CODE
+
+const isTyping = (e: KeyboardEvent) => {
+  const el = e.target as HTMLElement | null
+  if (!el) return false
+  if (el instanceof HTMLInputElement) return !['range', 'checkbox', 'radio', 'button'].includes(el.type)
+  return el.isContentEditable || el.tagName === 'TEXTAREA'
+}
+
+/** Wires the computer keyboard into the key bus. Call once from the root component. */
 export function useKeyboardInput() {
-  const isTyping = (e: KeyboardEvent) => {
-    const el = e.target as HTMLElement | null
-    if (!el) return false
-    if (el instanceof HTMLInputElement) return !['range', 'checkbox', 'radio', 'button'].includes(el.type)
-    return el.isContentEditable || el.tagName === 'TEXTAREA'
-  }
-
   const onKeyDown = (e: KeyboardEvent) => {
     // Leave browser and OS shortcuts alone.
     if (e.metaKey || e.ctrlKey || e.altKey || isTyping(e)) return
     resume()
 
-    if (KEY_INDEX.has(e.code)) {
+    if (isPlayKey(e.code)) {
       e.preventDefault()
-      if (e.repeat) return
-      const note = noteForCode(e.code)
-      if (note) press(e.code, note.midi)
+      if (!e.repeat) keys.emit('key:down', { code: e.code, source: 'keyboard' })
       return
     }
 
-    switch (e.code) {
-      case SUSTAIN_CODE:
-        e.preventDefault()
-        setSustain(true)
-        return
-      case 'ArrowUp':
-        e.preventDefault()
-        setOctave(octave() + 1)
-        return
-      case 'ArrowDown':
-        e.preventDefault()
-        setOctave(octave() - 1)
-        return
-      case 'ArrowRight':
-        e.preventDefault()
-        shiftRoot(1)
-        return
-      case 'ArrowLeft':
-        e.preventDefault()
-        shiftRoot(-1)
-        return
+    // Arrow keys change settings; they never play.
+    const action = ARROWS[e.code]
+    if (action) {
+      e.preventDefault()
+      action()
     }
   }
 
   const onKeyUp = (e: KeyboardEvent) => {
-    if (KEY_INDEX.has(e.code)) release(e.code)
-    else if (e.code === SUSTAIN_CODE) setSustain(false)
+    if (isPlayKey(e.code)) keys.emit('key:up', { code: e.code, source: 'keyboard' })
   }
 
   // Keyups are lost when the window loses focus; don't leave notes stuck.
-  const onBlur = () => releaseAll()
-  const onVisibility = () => document.hidden && releaseAll()
+  const reset = () => keys.emit('key:reset', undefined)
+  const onVisibility = () => document.hidden && reset()
 
   window.addEventListener('pointerdown', resume)
   window.addEventListener('keydown', onKeyDown)
   window.addEventListener('keyup', onKeyUp)
-  window.addEventListener('blur', onBlur)
+  window.addEventListener('blur', reset)
   document.addEventListener('visibilitychange', onVisibility)
 
   onCleanup(() => {
     window.removeEventListener('pointerdown', resume)
     window.removeEventListener('keydown', onKeyDown)
     window.removeEventListener('keyup', onKeyUp)
-    window.removeEventListener('blur', onBlur)
+    window.removeEventListener('blur', reset)
     document.removeEventListener('visibilitychange', onVisibility)
   })
+}
+
+const ARROWS: Record<string, () => void> = {
+  ArrowUp: () => setOctave(octave() + 1),
+  ArrowDown: () => setOctave(octave() - 1),
+  ArrowRight: () => shiftRoot(1),
+  ArrowLeft: () => shiftRoot(-1),
+}
+
+/** Pointer handlers that make an on-screen element act like a physical key. */
+export function pointerKey(code: string) {
+  const up = () => keys.emit('key:up', { code, source: 'pointer' })
+  return {
+    onPointerDown: (e: PointerEvent) => {
+      ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+      keys.emit('key:down', { code, source: 'pointer' })
+    },
+    onPointerUp: up,
+    onPointerCancel: up,
+  }
 }
