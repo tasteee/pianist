@@ -31,7 +31,13 @@ function load(): Partial<Saved> {
 const saved = load()
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n))
 
-const [rootIndex, setRootIndex] = createSignal(clamp(saved.root ?? 0, 0, 11))
+// Saved values may be stale or hand-edited; fall back when not a whole number.
+const getWholeNumber = (value: unknown, fallback: number): number => {
+	const isWholeNumber = typeof value === 'number' && Number.isInteger(value)
+	return isWholeNumber ? value : fallback
+}
+
+const [rootIndex, setRootIndex] = createSignal(clamp(getWholeNumber(saved.root, 0), 0, ROOTS.length - 1))
 const [scaleId, setScaleId] = createSignal(SCALES.some((s) => s.id === saved.scale) ? saved.scale! : 'major')
 const [octave, setOctaveRaw] = createSignal(clamp(saved.octave ?? 3, OCTAVE_MIN, OCTAVE_MAX))
 const [volume, setVolume] = createSignal(clamp(saved.volume ?? 100, 0, 127))
