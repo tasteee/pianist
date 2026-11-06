@@ -113,6 +113,35 @@ button {
   margin-left: auto;
 }
 
+.controls {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: var(--spacing-4);
+}
+
+.controls > * {
+  flex: none;
+}
+
+.controls .field-key {
+  width: 100px;
+}
+
+.controls .field-octave {
+  width: 130px;
+}
+
+.controls .field-scale,
+.controls .field-layout {
+  width: 240px;
+}
+
+.controls .field-layout {
+  margin-left: auto;
+}
+
 .keyboard-card {
   flex: none;
 }

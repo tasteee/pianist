@@ -34,16 +34,16 @@ export const Controls = () => {
   const selectedKey = String(rootIndex())
 
   return (
-    <div class="controls field-row">
-      <z-field label="Key">
+    <div class="controls">
+      <z-field class="field-key" label="Key">
         <z-select prop:options={keyOptions} prop:value={selectedKey} on:change={handleKeyChange} />
       </z-field>
 
-      <z-field label="Scale">
+      <z-field class="field-scale" label="Scale">
         <z-select prop:options={scaleOptions} prop:value={scaleId()} on:change={handleScaleChange} />
       </z-field>
 
-      <z-field label="Octave">
+      <z-field class="field-octave" label="Octave">
         <z-number-input
           has-stepper-buttons
           prop:min={OCTAVE_MIN}
@@ -53,7 +53,7 @@ export const Controls = () => {
         />
       </z-field>
 
-      <z-field label="Layout">
+      <z-field class="field-layout" label="Layout">
         <z-select prop:options={layoutOptions} prop:value={layoutId()} on:change={handleLayoutChange} />
       </z-field>
     </div>
