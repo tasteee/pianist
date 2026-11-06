@@ -1,4 +1,4 @@
-# Pianist
+# tasteink pianist
 
 Play piano from your computer keyboard, locked to any key and scale.
 
