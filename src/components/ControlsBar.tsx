@@ -39,7 +39,7 @@ export const ControlsBar = () => {
   const hasMidiOutputs = () => midiOutputs().length > 0
 
   return (
-    <div class="controls-bar field-row">
+    <div class="controls-bar">
       <z-field label="Instrument">
         <z-select prop:options={instrumentOptions} prop:value={instrument()} on:change={handleInstrumentChange} />
       </z-field>

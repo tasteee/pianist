@@ -95,6 +95,20 @@ button {
   gap: var(--spacing-4);
 }
 
+.controls-bar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: flex-start;
+  gap: var(--spacing-4);
+}
+
+.controls-bar > * {
+  flex: none;
+  width: 240px;
+}
+
 .keyboard-card {
   flex: none;
 }
