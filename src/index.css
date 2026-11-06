@@ -95,6 +95,53 @@ button {
   gap: var(--spacing-4);
 }
 
+.controls-bar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: flex-start;
+  gap: var(--spacing-4);
+}
+
+.controls-bar > * {
+  flex: none;
+  width: 240px;
+}
+
+.controls-bar > z-slider {
+  margin-left: auto;
+}
+
+.controls {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: var(--spacing-4);
+}
+
+.controls > * {
+  flex: none;
+}
+
+.controls .field-key {
+  width: 100px;
+}
+
+.controls .field-octave {
+  width: 130px;
+}
+
+.controls .field-scale,
+.controls .field-layout {
+  width: 240px;
+}
+
+.controls .field-layout {
+  margin-left: auto;
+}
+
 .keyboard-card {
   flex: none;
 }
@@ -144,9 +191,13 @@ button {
   border-color: var(--color-neutral-4);
 }
 
+.keycap.is-accidental {
+  background: var(--color-neutral-0);
+  border-color: var(--color-neutral-3);
+}
+
 .keycap.is-root {
   border-color: var(--color-primary-3);
-  background: var(--color-primary-1);
 }
 
 .keycap.is-silent {
@@ -169,6 +220,17 @@ button {
 .keycap-label {
   font-family: var(--font-mono);
   font-size: var(--font-size-1);
+}
+
+.keycap.is-octave {
+  background: var(--color-primary-1);
+  border-color: var(--color-primary-4);
+  color: var(--color-primary-6);
+}
+
+.keycap.is-echo {
+  background: var(--color-primary-2);
+  border-color: var(--color-primary-4);
 }
 
 .keycap.is-down {
