@@ -1,4 +1,5 @@
-import { OCTAVE_MAX, OCTAVE_MIN, octave, rootIndex, scaleId, setOctave, setRootIndex, setScaleId } from '../state'
+import { LAYOUTS } from '../music/layouts'
+import { OCTAVE_MAX, OCTAVE_MIN, layoutId, octave, rootIndex, scaleId, setLayoutId, setOctave, setRootIndex, setScaleId } from '../state'
 import { ROOTS, SCALES } from '../music/theory'
 import { blurActiveElement } from './ui/focus'
 
@@ -6,6 +7,8 @@ type ChangeEventT = CustomEvent<{ value: string | number }>
 
 const keyOptions = ROOTS.map((root, index) => ({ value: String(index), label: root.id }))
 const scaleOptions = SCALES.map((scale) => ({ value: scale.id, label: scale.name }))
+
+const layoutOptions = LAYOUTS.map((layout) => ({ value: layout.id, label: layout.name }))
 
 export const Controls = () => {
   const handleKeyChange = (event: ChangeEventT) => {
@@ -15,6 +18,11 @@ export const Controls = () => {
 
   const handleScaleChange = (event: ChangeEventT) => {
     setScaleId(String(event.detail.value))
+    blurActiveElement()
+  }
+
+  const handleLayoutChange = (event: ChangeEventT) => {
+    setLayoutId(String(event.detail.value))
     blurActiveElement()
   }
 
@@ -43,6 +51,10 @@ export const Controls = () => {
           prop:value={octave()}
           on:change={handleOctaveChange}
         />
+      </z-field>
+
+      <z-field label="Layout">
+        <z-select prop:options={layoutOptions} prop:value={layoutId()} on:change={handleLayoutChange} />
       </z-field>
     </div>
   )

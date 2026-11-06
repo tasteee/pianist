@@ -1,39 +1,4 @@
-/* ---- Tokens ------------------------------------------------------------ */
-
-:root {
-  --bg: #f4f4f4;
-  --surface: #ffffff;
-  --ink: #111111;
-  --ink-2: #4a4a4a;
-  --ink-3: #8c8c8c;
-  --ink-4: #b8b8b8;
-  --line: #e4e4e4;
-  --line-strong: #d2d2d2;
-  --fill: #ececec;
-  --fill-strong: #e0e0e0;
-
-  --key: #ffffff;
-  --key-root: #f0f0f0;
-  --key-edge: #d6d6d6;
-  --key-down: #161616;
-
-  --radius-s: 8px;
-  --radius-m: 12px;
-  --radius-l: 20px;
-
-  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-
-  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-
-  color-scheme: light;
-  font-family: var(--font);
-  font-feature-settings: 'cv11', 'ss01';
-  color: var(--ink);
-  background: var(--bg);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* Pianist styles. Colors, radii and type come from the zest tokens. */
 
 *,
 *::before,
@@ -42,79 +7,68 @@
 }
 
 html,
-body {
+body,
+#root {
+  height: 100%;
   margin: 0;
-  min-height: 100%;
-  background: var(--bg);
-}
-
-button,
-select,
-input {
-  font: inherit;
-  color: inherit;
+  overflow: hidden;
 }
 
 button {
+  font: inherit;
+  color: inherit;
   cursor: pointer;
 }
 
 :focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
 /* ---- Shell ------------------------------------------------------------- */
 
 .app {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 24px 16px 40px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  min-height: 100vh;
-}
-
-@media (min-width: 720px) {
-  .app {
-    padding: 32px 32px 48px;
-    gap: 24px;
-  }
+  gap: var(--spacing-3);
+  height: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--spacing-4) var(--spacing-5);
+  font-family: var(--font-sans);
+  color: var(--color-foreground);
 }
 
 .topbar {
   display: flex;
+  flex: none;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--spacing-4);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 17px;
+  gap: var(--spacing-3);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-4);
   letter-spacing: -0.02em;
 }
 
 .brand-mark {
   width: 22px;
   height: 18px;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   background:
-    linear-gradient(90deg, transparent 22%, #fff 22% 34%, transparent 34% 44%, #fff 44% 56%, transparent 56% 66%, #fff 66% 78%, transparent 78%) center / 100% 60% no-repeat,
-    var(--ink);
+    linear-gradient(90deg, transparent 22%, var(--color-neutral-0) 22% 34%, transparent 34% 44%, var(--color-neutral-0) 44% 56%, transparent 56% 66%, var(--color-neutral-0) 66% 78%, transparent 78%) center / 100% 60% no-repeat,
+    var(--color-foreground);
 }
-
-
-/* ---- Status & controls ------------------------------------------------- */
 
 .status {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-2);
   min-width: 0;
 }
 
@@ -122,66 +76,48 @@ button {
   width: 96px;
 }
 
-.controls {
-  padding: 16px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-l);
+/* ---- Stage: controls, keyboard card, controls --------------------------- */
+
+.stage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  min-height: 0;
 }
 
 .field-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  align-items: start;
-  gap: 16px;
+  flex: none;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  align-items: end;
+  gap: var(--spacing-4);
 }
 
-.chip-row {
+.keyboard-card {
   display: flex;
-  flex-wrap: wrap;
+  flex: 1;
+  min-height: 0;
+}
+
+.keyboard-stage {
+  display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.custom-editor {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.hints-note {
-  flex-basis: 100%;
-}
-
-/* ---- Stage ------------------------------------------------------------- */
-
-.stage {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding: 20px 16px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-l);
-  container-type: inline-size;
-}
-
-@media (min-width: 720px) {
-  .stage {
-    padding: 32px;
-    gap: 32px;
-  }
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  container-type: size;
 }
 
 /* ---- Computer keyboard ------------------------------------------------- */
 
 .keyboard {
   --gap: max(3px, calc(var(--u) * 0.08));
-  --u: min(76px, calc(100cqw / var(--units)));
+  --u: min(76px, calc(100cqw / var(--units)), calc(100cqh / 5.2));
   display: flex;
   flex-direction: column;
   gap: var(--gap);
-  align-self: center;
   width: calc(var(--u) * var(--units));
   user-select: none;
   -webkit-user-select: none;
@@ -195,62 +131,56 @@ button {
 }
 
 .keycap {
-  --h: calc(var(--u) - var(--gap));
   position: relative;
   flex: none;
   width: calc(var(--u) - var(--gap));
-  height: var(--h);
+  height: calc(var(--u) - var(--gap));
   padding: 0;
-  border: 1px solid var(--key-edge);
-  border-bottom-width: max(2px, calc(var(--u) * 0.05));
-  border-radius: max(6px, calc(var(--u) * 0.16));
-  background: var(--key);
-  color: var(--ink);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-background-light);
+  color: var(--color-foreground);
   transition:
-    background 0.22s var(--ease),
-    color 0.22s var(--ease),
-    border-color 0.22s var(--ease),
-    transform 0.22s var(--ease);
+    background var(--motion-base) var(--ease-enter),
+    border-color var(--motion-base) var(--ease-enter),
+    color var(--motion-base) var(--ease-enter);
   -webkit-tap-highlight-color: transparent;
 }
 
 .keycap:hover {
-  border-color: var(--ink-4);
+  border-color: var(--color-neutral-4);
 }
 
 .keycap.is-root {
-  background: var(--key-root);
+  border-color: var(--color-primary-3);
+  background: var(--color-primary-1);
 }
 
 .keycap.is-silent {
   background: transparent;
   border-style: dashed;
-  border-bottom-width: 1px;
-  box-shadow: none;
   cursor: default;
 }
 
 .keycap.is-silent .keycap-legend {
-  color: var(--ink-4);
+  color: var(--color-neutral-4);
 }
 
 .keycap.is-down {
-  background: var(--key-down);
-  border-color: var(--key-down);
-  color: #fff;
-  transform: translateY(1px);
-  transition-duration: 0.03s;
+  background: var(--color-primary-4);
+  border-color: var(--color-primary-4);
+  color: var(--color-neutral-0);
+  transition-duration: var(--motion-instant);
 }
 
 .keycap-legend {
   position: absolute;
   top: calc(var(--u) * 0.08);
   left: calc(var(--u) * 0.11);
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   font-size: max(8px, calc(var(--u) * 0.15));
   line-height: 1;
-  color: var(--ink-3);
+  color: var(--color-neutral-5);
 }
 
 .keycap-note {
@@ -261,20 +191,20 @@ button {
   justify-content: center;
   padding-top: calc(var(--u) * 0.1);
   font-size: max(10px, calc(var(--u) * 0.29));
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   letter-spacing: -0.02em;
 }
 
 .keycap-acc {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .keycap-oct {
   align-self: flex-end;
   margin: 0 0 calc(var(--u) * 0.2) 1px;
   font-size: 0.5em;
-  font-weight: 500;
-  color: var(--ink-3);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-5);
   vertical-align: baseline;
 }
 
@@ -282,21 +212,21 @@ button {
   position: absolute;
   right: calc(var(--u) * 0.11);
   bottom: calc(var(--u) * 0.08);
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   font-size: max(7px, calc(var(--u) * 0.13));
   line-height: 1;
-  color: var(--ink-4);
+  color: var(--color-neutral-5);
 }
 
 .keycap.is-root .keycap-degree {
-  color: var(--ink);
-  font-weight: 700;
+  color: var(--color-primary-6);
+  font-weight: var(--font-weight-bold);
 }
 
 .keycap.is-down .keycap-legend,
 .keycap.is-down .keycap-oct,
 .keycap.is-down .keycap-degree {
-  color: rgb(255 255 255 / 0.55);
+  color: var(--color-neutral-1);
 }
 
 .keyboard-row--space {
@@ -305,34 +235,32 @@ button {
 }
 
 .keycap--space {
-  width: calc(var(--u) * 6.25 - var(--gap));
-  height: calc(var(--u) * 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: calc(var(--u) * 6.25 - var(--gap));
+  height: calc(var(--u) * 0.7);
 }
 
 .keycap-space-label {
   font-size: max(10px, calc(var(--u) * 0.19));
-  font-weight: 500;
-  color: var(--ink-2);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-7);
 }
 
 .keycap--space.is-down .keycap-space-label {
-  color: #fff;
+  color: var(--color-neutral-0);
 }
 
 /* Small screens: drop secondary legends, keep the notes. */
 @container (max-width: 560px) {
   .keycap-legend,
-  .keycap-degree {
+  .keycap-degree,
+  .keycap-oct {
     display: none;
   }
   .keycap-note {
     padding-top: 0;
-  }
-  .keycap-oct {
-    display: none;
   }
 }
 
@@ -340,16 +268,14 @@ button {
 
 .hints {
   display: flex;
+  flex: none;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 20px;
+  gap: var(--spacing-2) var(--spacing-5);
 }
 
-@media (min-width: 900px) {
-  .hints-note {
-    flex-basis: auto;
-    margin-left: auto;
-  }
+.hints-note {
+  margin-left: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {

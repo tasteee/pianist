@@ -2,7 +2,6 @@ import { Match, Switch } from 'solid-js'
 import { Controls } from './components/Controls'
 import { ControlsBar } from './components/ControlsBar'
 import { Keyboard } from './components/Keyboard'
-import { CustomLayoutEditor } from './components/LayoutPanel'
 import { usePlayEngine } from './engine'
 import { audioUnlocked, loadState } from './engine/player'
 import { useKeyboardInput } from './input'
@@ -22,12 +21,12 @@ export default function App() {
         <Status />
       </header>
 
-      <Controls />
-
       <main class="stage">
-        <Keyboard />
+        <Controls />
+        <z-card class="keyboard-card">
+          <Keyboard />
+        </z-card>
         <ControlsBar />
-        <CustomLayoutEditor />
       </main>
 
       <footer class="hints">

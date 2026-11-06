@@ -21,6 +21,7 @@ export function Keyboard() {
   onMount(loadLegends)
 
   return (
+    <div class="keyboard-stage">
     <div class="keyboard" style={{ '--units': KEYBOARD_UNITS }} role="group" aria-label="Computer keyboard">
       <For each={ROWS}>
         {(row) => (
@@ -42,6 +43,7 @@ export function Keyboard() {
           <span class="keycap-space-label">Sustain</span>
         </button>
       </div>
+    </div>
     </div>
   )
 }

@@ -2,7 +2,7 @@ import { createEffect, createMemo, createSignal } from 'solid-js'
 import { connectMidi, midiOutputs, selectMidiOutput } from './engine/output'
 import { setInstrument as setEngineInstrument, setVolume as setPianoVolume, syncMidiVolume, type InstrumentT } from './engine/player'
 import { KEYS } from './music/keymap'
-import { DEFAULT_CUSTOM, LAYOUTS, type CustomParams } from './music/layouts'
+import { LAYOUTS } from './music/layouts'
 import { ROOTS, SCALES, mod, scaleNote, type Note } from './music/theory'
 
 // ---- Settings (persisted) -------------------------------------------------
@@ -16,8 +16,6 @@ type Saved = {
   octave: number
   volume: number
   layout: string
-  custom: CustomParams
-  seed: number
   instrument: InstrumentT
   midiOutputId: string
 }
@@ -45,16 +43,12 @@ const [scaleId, setScaleId] = createSignal(SCALES.some((s) => s.id === saved.sca
 const [octave, setOctaveRaw] = createSignal(clamp(saved.octave ?? 3, OCTAVE_MIN, OCTAVE_MAX))
 const [volume, setVolume] = createSignal(clamp(saved.volume ?? 100, 0, 127))
 const [layoutId, setLayoutId] = createSignal(LAYOUTS.some((l) => l.id === saved.layout) ? saved.layout! : 'standard')
-const [custom, setCustomRaw] = createSignal<CustomParams>({ ...DEFAULT_CUSTOM, ...saved.custom })
-const [seed, setSeed] = createSignal(saved.seed ?? 20261005)
 const [instrument, setInstrument] = createSignal<InstrumentT>(saved.instrument === 'midi' ? 'midi' : 'piano')
 const [midiOutputId, setMidiOutputId] = createSignal(saved.midiOutputId ?? '')
 
-export { rootIndex, setRootIndex, scaleId, setScaleId, octave, volume, setVolume, layoutId, setLayoutId, custom, instrument, setInstrument, midiOutputId, setMidiOutputId }
+export { rootIndex, setRootIndex, scaleId, setScaleId, octave, volume, setVolume, layoutId, setLayoutId, instrument, setInstrument, midiOutputId, setMidiOutputId }
 
 export const layout = createMemo(() => LAYOUTS.find((l) => l.id === layoutId()) ?? LAYOUTS[0])
-export const setCustom = (patch: Partial<CustomParams>) => setCustomRaw((c) => ({ ...c, ...patch }))
-export const reshuffle = () => setSeed(Math.floor(Math.random() * 0xffffffff))
 
 export const root = createMemo(() => ROOTS[rootIndex()])
 export const scale = createMemo(() => SCALES.find((s) => s.id === scaleId()) ?? SCALES[0])
@@ -90,8 +84,6 @@ createEffect(() => {
     octave: octave(),
     volume: volume(),
     layout: layoutId(),
-    custom: custom(),
-    seed: seed(),
     instrument: instrument(),
     midiOutputId: midiOutputId(),
   }
@@ -110,7 +102,7 @@ const MIDI_MAX = 108
 
 /** Every key's note under the current root, scale, octave and layout. */
 export const keyNotes = createMemo(() => {
-  const ctx = { len: scale().steps.length, custom: custom(), seed: seed() }
+  const ctx = { len: scale().steps.length }
   const map = new Map<string, Note>()
   for (const key of KEYS) {
     const at = layout().place(key, ctx)
