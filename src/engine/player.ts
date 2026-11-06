@@ -2,6 +2,7 @@ import { createMemo, createSignal } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { SplendidGrandPiano, type StopFn } from 'smplr'
 import { notes } from './events'
+import { sendAllNotesOff, sendNoteOff, sendNoteOn, sendSustain, sendVolume } from './output'
 
 // Layer 3: notes → sound.
 // Owns the AudioContext and the Splendid Grand Piano. Handles the sustain
@@ -41,8 +42,36 @@ export function resume() {
   context.resume().then(() => setAudioUnlocked(true))
 }
 
+export type InstrumentT = 'piano' | 'midi'
+
+let instrument: InstrumentT = 'piano'
+let volume = 100
+
 export function setVolume(value: number) {
+  volume = value
   piano.output.volume = value
+  if (instrument === 'midi') sendVolume(value)
+}
+
+// Switching instruments silences the old one first.
+export function setInstrument(next: InstrumentT) {
+  const hasChanged = next !== instrument
+  if (!hasChanged) return
+  stopEverything()
+  instrument = next
+  if (instrument === 'midi') sendVolume(volume)
+}
+
+/** Resend volume, e.g. after picking a different MIDI output. */
+export function syncMidiVolume() {
+  if (instrument === 'midi') sendVolume(volume)
+}
+
+const startVoice = (midi: number, velocity: number): StopFn => {
+  const isMidi = instrument === 'midi'
+  if (!isMidi) return piano.start({ note: midi, velocity })
+  sendNoteOn(midi, velocity)
+  return () => sendNoteOff(midi)
 }
 
 const stops = new Map<string, StopFn>()
@@ -55,13 +84,22 @@ function stop(id: string) {
   setVoices(id, undefined)
 }
 
+function stopEverything() {
+  for (const id of [...stops.keys()]) stop(id)
+  setPedalDown(false)
+  if (instrument === 'midi') {
+    sendSustain(false)
+    sendAllNotesOff()
+  }
+}
+
 /** Start listening to the note bus. */
 export function startPlayer() {
   const offs = [
     notes.on('note:on', ({ id, midi, velocity }) => {
       resume()
       stop(id) // re-strike: a held or sustained voice with this id is replaced
-      stops.set(id, piano.start({ note: midi, velocity }))
+      stops.set(id, startVoice(midi, velocity))
       setVoices(id, midi)
     }),
 
@@ -73,14 +111,12 @@ export function startPlayer() {
 
     notes.on('pedal', ({ down }) => {
       setPedalDown(down)
+      if (instrument === 'midi') sendSustain(down)
       if (down) return
       for (const id of [...sustained]) stop(id)
     }),
 
-    notes.on('note:panic', () => {
-      for (const id of [...stops.keys()]) stop(id)
-      setPedalDown(false)
-    }),
+    notes.on('note:panic', stopEverything),
   ]
 
   return () => offs.forEach((off) => off())

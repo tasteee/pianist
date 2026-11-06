@@ -1,19 +1,16 @@
-import { For, Match, Switch } from 'solid-js'
+import { Match, Switch } from 'solid-js'
 import { Controls } from './components/Controls'
+import { ControlsBar } from './components/ControlsBar'
 import { Keyboard } from './components/Keyboard'
-import { LayoutPanel } from './components/LayoutPanel'
-import { PianoStrip } from './components/PianoStrip'
+import { CustomLayoutEditor } from './components/LayoutPanel'
 import { usePlayEngine } from './engine'
-import { audioUnlocked, loadState, sounding } from './engine/player'
+import { audioUnlocked, loadState } from './engine/player'
 import { useKeyboardInput } from './input'
-import { mod, noteLabel } from './music/theory'
-import { noteForCode, root, scale, scaleNotes } from './state'
+import { noteForCode } from './state'
 
 export default function App() {
   usePlayEngine((code) => noteForCode(code)?.midi)
   useKeyboardInput()
-
-  const soundingClasses = () => new Set([...sounding()].map((m) => mod(m, 12)))
 
   return (
     <div class="app">
@@ -28,63 +25,58 @@ export default function App() {
       <Controls />
 
       <main class="stage">
-        <section class="readout" aria-live="polite">
-          <h1 class="readout-title">
-            {root().id} <span class="readout-scale">{scale().name}</span>
-          </h1>
-          <ol class="degrees">
-            <For each={scaleNotes()}>
-              {(n) => (
-                <li class="degree" classList={{ 'is-on': soundingClasses().has(mod(n.midi, 12)) }}>
-                  <span class="degree-note">{noteLabel(n)}</span>
-                  <span class="degree-num">{n.degree}</span>
-                </li>
-              )}
-            </For>
-          </ol>
-        </section>
-
-        <LayoutPanel />
         <Keyboard />
-        <PianoStrip />
+        <ControlsBar />
+        <CustomLayoutEditor />
       </main>
 
       <footer class="hints">
-        <span><kbd>↑</kbd><kbd>↓</kbd> Octave</span>
-        <span><kbd>←</kbd><kbd>→</kbd> Key</span>
-        <span><kbd>Space</kbd> Sustain</span>
-        <span class="hints-note">Numbers on keys are scale degrees.</span>
+        <z-text size="sm" color="muted">
+          <z-kbd size="sm">↑</z-kbd> <z-kbd size="sm">↓</z-kbd> Octave
+        </z-text>
+        <z-text size="sm" color="muted">
+          <z-kbd size="sm">←</z-kbd> <z-kbd size="sm">→</z-kbd> Key
+        </z-text>
+        <z-text size="sm" color="muted">
+          <z-kbd size="sm">Space</z-kbd> Sustain
+        </z-text>
+        <z-text size="sm" color="muted" class="hints-note">
+          Numbers on keys are scale degrees.
+        </z-text>
       </footer>
     </div>
   )
 }
 
-function Status() {
+const getLoadProgressPercent = () => {
+  const state = loadState()
+  const isLoading = state.status === 'loading'
+  if (!isLoading) return 100
+  return Math.round(state.progress * 100)
+}
+
+const Status = () => {
+  const isError = () => loadState().status === 'error'
+  const isLoading = () => loadState().status === 'loading'
+  const isIdle = () => !audioUnlocked()
+
   return (
     <div class="status" role="status">
       <Switch>
-        <Match when={loadState().status === 'error'}>
-          <span class="status-dot is-error" />
-          Couldn’t load piano
+        <Match when={isError()}>
+          <z-status-dot status="busy" label="Couldn’t load piano" />
         </Match>
-        <Match when={loadState().status === 'loading'}>
-          <span class="status-ring" style={{ '--p': progress() }} />
-          Loading piano
+        <Match when={isLoading()}>
+          <z-progress size="sm" tone="secondary" label="Loading piano" prop:value={getLoadProgressPercent()} />
+          <z-text size="sm" color="muted">Loading piano</z-text>
         </Match>
-        <Match when={!audioUnlocked()}>
-          <span class="status-dot is-idle" />
-          Press any key to start
+        <Match when={isIdle()}>
+          <z-status-dot status="away" does-pulse label="Press any key to start" />
         </Match>
         <Match when={true}>
-          <span class="status-dot is-ready" />
-          Ready
+          <z-status-dot status="online" label="Ready" />
         </Match>
       </Switch>
     </div>
   )
-}
-
-const progress = () => {
-  const s = loadState()
-  return s.status === 'loading' ? s.progress : 1
 }

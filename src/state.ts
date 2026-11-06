@@ -1,5 +1,6 @@
 import { createEffect, createMemo, createSignal } from 'solid-js'
-import { setVolume as setPianoVolume } from './engine/player'
+import { connectMidi, midiOutputs, selectMidiOutput } from './engine/output'
+import { setInstrument as setEngineInstrument, setVolume as setPianoVolume, syncMidiVolume, type InstrumentT } from './engine/player'
 import { KEYS } from './music/keymap'
 import { DEFAULT_CUSTOM, LAYOUTS, type CustomParams } from './music/layouts'
 import { ROOTS, SCALES, mod, scaleNote, type Note } from './music/theory'
@@ -17,6 +18,8 @@ type Saved = {
   layout: string
   custom: CustomParams
   seed: number
+  instrument: InstrumentT
+  midiOutputId: string
 }
 const STORAGE_KEY = 'pianist:settings'
 
@@ -31,15 +34,23 @@ function load(): Partial<Saved> {
 const saved = load()
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n))
 
-const [rootIndex, setRootIndex] = createSignal(clamp(saved.root ?? 0, 0, 11))
+// Saved values may be stale or hand-edited; fall back when not a whole number.
+const getWholeNumber = (value: unknown, fallback: number): number => {
+	const isWholeNumber = typeof value === 'number' && Number.isInteger(value)
+	return isWholeNumber ? value : fallback
+}
+
+const [rootIndex, setRootIndex] = createSignal(clamp(getWholeNumber(saved.root, 0), 0, ROOTS.length - 1))
 const [scaleId, setScaleId] = createSignal(SCALES.some((s) => s.id === saved.scale) ? saved.scale! : 'major')
 const [octave, setOctaveRaw] = createSignal(clamp(saved.octave ?? 3, OCTAVE_MIN, OCTAVE_MAX))
 const [volume, setVolume] = createSignal(clamp(saved.volume ?? 100, 0, 127))
 const [layoutId, setLayoutId] = createSignal(LAYOUTS.some((l) => l.id === saved.layout) ? saved.layout! : 'standard')
 const [custom, setCustomRaw] = createSignal<CustomParams>({ ...DEFAULT_CUSTOM, ...saved.custom })
 const [seed, setSeed] = createSignal(saved.seed ?? 20261005)
+const [instrument, setInstrument] = createSignal<InstrumentT>(saved.instrument === 'midi' ? 'midi' : 'piano')
+const [midiOutputId, setMidiOutputId] = createSignal(saved.midiOutputId ?? '')
 
-export { rootIndex, setRootIndex, scaleId, setScaleId, octave, volume, setVolume, layoutId, setLayoutId, custom }
+export { rootIndex, setRootIndex, scaleId, setScaleId, octave, volume, setVolume, layoutId, setLayoutId, custom, instrument, setInstrument, midiOutputId, setMidiOutputId }
 
 export const layout = createMemo(() => LAYOUTS.find((l) => l.id === layoutId()) ?? LAYOUTS[0])
 export const setCustom = (patch: Partial<CustomParams>) => setCustomRaw((c) => ({ ...c, ...patch }))
@@ -52,6 +63,26 @@ export const setOctave = (n: number) => setOctaveRaw(clamp(n, OCTAVE_MIN, OCTAVE
 export const shiftRoot = (by: number) => setRootIndex((i) => mod(i + by, 12))
 
 createEffect(() => setPianoVolume(volume()))
+
+createEffect(() => {
+  const isMidi = instrument() === 'midi'
+  if (isMidi) connectMidi()
+  setEngineInstrument(instrument())
+})
+
+// Pick the first output when none (or a vanished one) is selected.
+createEffect(() => {
+  const outputs = midiOutputs()
+  const hasOutputs = outputs.length > 0
+  if (!hasOutputs) return
+  const isSelectedAvailable = outputs.some((output) => output.id === midiOutputId())
+  if (!isSelectedAvailable) setMidiOutputId(outputs[0].id)
+})
+
+createEffect(() => {
+  selectMidiOutput(midiOutputId())
+  syncMidiVolume()
+})
 createEffect(() => {
   const data: Saved = {
     root: rootIndex(),
@@ -61,6 +92,8 @@ createEffect(() => {
     layout: layoutId(),
     custom: custom(),
     seed: seed(),
+    instrument: instrument(),
+    midiOutputId: midiOutputId(),
   }
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
