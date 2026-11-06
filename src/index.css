@@ -109,6 +109,10 @@ button {
   width: 240px;
 }
 
+.controls-bar > z-slider {
+  margin-left: auto;
+}
+
 .keyboard-card {
   flex: none;
 }
