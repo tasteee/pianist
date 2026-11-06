@@ -12,6 +12,8 @@ const isPlayKey = (code: string) => KEY_INDEX.has(code) || code === SUSTAIN_CODE
 const isTyping = (e: KeyboardEvent) => {
   const el = e.target as HTMLElement | null
   if (!el) return false
+  // An open zest select needs the arrow keys for its own options.
+  if (el.tagName === 'Z-SELECT') return true
   if (el instanceof HTMLInputElement) return !['range', 'checkbox', 'radio', 'button'].includes(el.type)
   return el.isContentEditable || el.tagName === 'TEXTAREA'
 }
