@@ -82,6 +82,7 @@ button {
   display: flex;
   flex: 1;
   flex-direction: column;
+  justify-content: center;
   gap: var(--spacing-3);
   min-height: 0;
 }
@@ -95,30 +96,23 @@ button {
 }
 
 .keyboard-card {
-  display: flex;
-  flex: 1;
-  min-height: 0;
+  flex: none;
 }
 
 .keyboard-stage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
-  height: 100%;
-  min-height: 0;
-  container-type: size;
+  container-type: inline-size;
 }
 
 /* ---- Computer keyboard ------------------------------------------------- */
 
 .keyboard {
-  --gap: max(3px, calc(var(--u) * 0.08));
-  --u: min(76px, calc(100cqw / var(--units)), calc(100cqh / 5.2));
+  --gap: 6px;
+  --u: min(calc(100cqw / var(--units)), calc((100dvh - 300px) / 5));
   display: flex;
   flex-direction: column;
   gap: var(--gap);
-  width: calc(var(--u) * var(--units));
+  width: 100%;
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;
@@ -127,13 +121,12 @@ button {
 .keyboard-row {
   display: flex;
   gap: var(--gap);
-  padding-left: calc(var(--indent, 0) * var(--u));
 }
 
 .keycap {
   position: relative;
-  flex: none;
-  width: calc(var(--u) - var(--gap));
+  flex: var(--w, 1) 1 0;
+  min-width: 0;
   height: calc(var(--u) - var(--gap));
   padding: 0;
   border: 1px solid var(--color-border);
@@ -147,7 +140,7 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
-.keycap:hover {
+.keycap:hover:not(:disabled) {
   border-color: var(--color-neutral-4);
 }
 
@@ -164,6 +157,18 @@ button {
 
 .keycap.is-silent .keycap-legend {
   color: var(--color-neutral-4);
+}
+
+.keycap.is-disabled {
+  background: transparent;
+  border-color: var(--color-neutral-2);
+  color: var(--color-neutral-4);
+  cursor: default;
+}
+
+.keycap-label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-1);
 }
 
 .keycap.is-down {
@@ -229,26 +234,11 @@ button {
   color: var(--color-neutral-1);
 }
 
-.keyboard-row--space {
-  padding-left: calc(var(--u) * 2.75);
-  margin-top: calc(var(--gap) * 0.5);
-}
-
 .keycap--space {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: calc(var(--u) * 6.25 - var(--gap));
-  height: calc(var(--u) * 0.7);
-}
-
-.keycap-space-label {
-  font-size: max(10px, calc(var(--u) * 0.19));
-  font-weight: var(--font-weight-medium);
   color: var(--color-neutral-7);
 }
 
-.keycap--space.is-down .keycap-space-label {
+.keycap--space.is-down {
   color: var(--color-neutral-0);
 }
 
