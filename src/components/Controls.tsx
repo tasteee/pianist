@@ -1,70 +1,49 @@
-import { For } from 'solid-js'
+import { OCTAVE_MAX, OCTAVE_MIN, octave, rootIndex, scaleId, setOctave, setRootIndex, setScaleId } from '../state'
 import { ROOTS, SCALES } from '../music/theory'
-import { OCTAVE_MAX, OCTAVE_MIN, octave, rootIndex, scaleId, setOctave, setRootIndex, setScaleId, setVolume, volume } from '../state'
-import { Chevron } from './ui/Chevron'
-import { Segmented } from './ui/Segmented'
-import { Stepper, blurTarget } from './ui/Stepper'
+import { blurActiveElement } from './ui/focus'
 
-const GROUPS = ['Common', 'Modes', 'Other'] as const
+type ChangeEventT = CustomEvent<{ value: string | number }>
 
-export function Controls() {
+const keyOptions = ROOTS.map((root, index) => ({ value: String(index), label: root.id }))
+const scaleOptions = SCALES.map((scale) => ({ value: scale.id, label: scale.name }))
+
+export const Controls = () => {
+  const handleKeyChange = (event: ChangeEventT) => {
+    setRootIndex(Number(event.detail.value))
+    blurActiveElement()
+  }
+
+  const handleScaleChange = (event: ChangeEventT) => {
+    setScaleId(String(event.detail.value))
+    blurActiveElement()
+  }
+
+  const handleOctaveChange = (event: ChangeEventT) => {
+    setOctave(Number(event.detail.value))
+    blurActiveElement()
+  }
+
+  const selectedKey = String(rootIndex())
+
   return (
-    <div class="controls">
-      <div class="field field--key">
-        <span class="field-label">Key</span>
-        <Segmented
-          label="Key"
-          class="segmented--keys"
-          value={rootIndex()}
-          onChange={setRootIndex}
-          options={ROOTS.map((r, i) => ({ value: i, label: r.id }))}
+    <div class="controls field-row">
+      <z-field label="Key">
+        <z-select prop:options={keyOptions} prop:value={selectedKey} on:change={handleKeyChange} />
+      </z-field>
+
+      <z-field label="Scale">
+        <z-select prop:options={scaleOptions} prop:value={scaleId()} on:change={handleScaleChange} />
+      </z-field>
+
+      <z-field label="Octave">
+        <z-number-input
+          has-stepper-buttons
+          prop:min={OCTAVE_MIN}
+          prop:max={OCTAVE_MAX}
+          prop:value={octave()}
+          on:change={handleOctaveChange}
         />
-      </div>
-
-      <div class="field field--scale">
-        <label class="field-label" for="scale">Scale</label>
-        <div class="select">
-          <select
-            id="scale"
-            value={scaleId()}
-            onChange={(e) => {
-              setScaleId(e.currentTarget.value)
-              blurTarget(e)
-            }}
-          >
-            <For each={GROUPS}>
-              {(g) => (
-                <optgroup label={g}>
-                  <For each={SCALES.filter((s) => s.group === g)}>
-                    {(s) => <option value={s.id}>{s.name}</option>}
-                  </For>
-                </optgroup>
-              )}
-            </For>
-          </select>
-          <Chevron />
-        </div>
-      </div>
-
-      <div class="field field--octave">
-        <span class="field-label">Octave</span>
-        <Stepper label="Octave" value={octave()} min={OCTAVE_MIN} max={OCTAVE_MAX} onChange={setOctave} />
-      </div>
-
-      <div class="field field--volume">
-        <label class="field-label" for="volume">Volume</label>
-        <input
-          id="volume"
-          class="slider"
-          type="range"
-          min="0"
-          max="127"
-          value={volume()}
-          style={{ '--fill': `${(volume() / 127) * 100}%` }}
-          onInput={(e) => setVolume(Number(e.currentTarget.value))}
-          onChange={blurTarget}
-        />
-      </div>
+      </z-field>
     </div>
   )
 }
